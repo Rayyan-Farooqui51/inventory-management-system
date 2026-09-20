@@ -1,6 +1,9 @@
 package model;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Product {
     private final String productId;
@@ -11,6 +14,8 @@ public class Product {
     private BigDecimal price;
     private int quantity;
     private int reorderLevel;
+
+    private final Set<Supplier> suppliers = new HashSet<>();
 
     public Product(String productId, String sku, String name, Category category, BigDecimal price, int quantity, int reorderLevel){
         if (productId == null || productId.isBlank()){
@@ -94,5 +99,24 @@ public class Product {
                 ", quantity=" + quantity +
                 ", reorderLevel=" + reorderLevel +
                 '}';
+    }
+
+    public void addSupplier(Supplier supplier){
+        if (supplier == null){
+            throw new IllegalArgumentException("supplier cannot be null");
+        }
+
+        suppliers.add(supplier);
+    }
+
+    public void removeSupplier(Supplier supplier){
+        if (supplier == null){
+            throw new IllegalArgumentException("supplier cannot be null");
+        }
+
+        suppliers.remove(supplier);
+    }
+    public Set<Supplier> getSuppliers(){
+        return Collections.unmodifiableSet(suppliers);
     }
 }
