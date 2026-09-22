@@ -119,4 +119,21 @@ public class Product {
     public Set<Supplier> getSuppliers(){
         return Collections.unmodifiableSet(suppliers);
     }
+
+    public void increaseStock(int amount){
+        if (amount <= 0){
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+        quantity += amount;
+    }
+
+    public void decreaseStock(int amount){
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+        if (amount > quantity){
+            throw new IllegalStateException("Insufficient Quantity");
+        }
+        quantity -= amount;
+    }
 }
