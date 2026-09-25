@@ -1,5 +1,7 @@
 package model;
 
+import exception.InsufficientStockException;
+
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashSet;
@@ -132,7 +134,7 @@ public class Product {
             throw new IllegalArgumentException("Amount must be greater than zero");
         }
         if (amount > quantity){
-            throw new IllegalStateException("Insufficient Quantity");
+            throw new InsufficientStockException("Insufficient stock: requested " + amount + ", available " + quantity);
         }
         quantity -= amount;
     }

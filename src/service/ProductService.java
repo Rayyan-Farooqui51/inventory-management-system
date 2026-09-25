@@ -1,5 +1,7 @@
 package service;
 
+import exception.DuplicateProductException;
+import exception.ProductNotFoundException;
 import model.Category;
 import model.Product;
 import repository.ProductRepository;
@@ -20,11 +22,11 @@ public class ProductService {
 
     public Product createProduct(String productId, String sku, String name, Category category, BigDecimal price, int quantity, int reorderLevel){
         if(productRepository.existsById(productId)){
-            throw new IllegalArgumentException("Duplicate product Id found");
+            throw new DuplicateProductException("Product with ID " + productId + " already exists");
         }
 
         if (productRepository.existsBySku(sku)){
-            throw new IllegalArgumentException("Duplicate sku found");
+            throw new DuplicateProductException("Product with SKU " + sku + " already exists");
         }
 
         Product product = new Product(productId, sku, name, category, price, quantity, reorderLevel);
@@ -36,12 +38,12 @@ public class ProductService {
 
     public Product findById(String productId){
         return productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with ID " + productId + " does not exist"));
+                .orElseThrow(() -> new ProductNotFoundException("Product with ID " + productId + " does not exist"));
     }
 
     public Product findBySku(String sku){
         return productRepository.findBySku(sku)
-                .orElseThrow(() -> new IllegalArgumentException("Product with sku " + sku + " does not exist"));
+                .orElseThrow(() -> new ProductNotFoundException("Product with sku " + sku + " does not exist"));
     }
 
     public List<Product> findAll(){

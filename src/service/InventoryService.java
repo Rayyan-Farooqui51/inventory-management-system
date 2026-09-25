@@ -1,5 +1,6 @@
 package service;
 
+import exception.ProductNotFoundException;
 import model.Product;
 import model.StockMovement;
 import model.StockMovementType;
@@ -26,7 +27,8 @@ public class InventoryService {
     }
 
     public StockMovement stockIn(String movementId, String productId, int amount){
-        Product product = productRepository.findById(productId).orElseThrow(()-> new IllegalArgumentException("Product with ID " + productId + " does not exist"));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(()-> new ProductNotFoundException("Product with ID " + productId + " does not exist"));
 
         product.increaseStock(amount);
 
@@ -41,7 +43,8 @@ public class InventoryService {
     }
 
     public StockMovement stockOut(String movementId, String productId, int amount){
-        Product product = productRepository.findById(productId).orElseThrow(()-> new IllegalArgumentException("Product with ID " + productId + " does not exist"));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(()-> new ProductNotFoundException("Product with ID " + productId + " does not exist"));
 
         product.decreaseStock(amount);
 
@@ -54,5 +57,4 @@ public class InventoryService {
         return stockMovement;
 
     }
-
 }
