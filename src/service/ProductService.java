@@ -5,6 +5,8 @@ import model.Product;
 import repository.ProductRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 public class ProductService {
     private final ProductRepository productRepository;
@@ -32,6 +34,18 @@ public class ProductService {
         return product;
     }
 
+    public Product findById(String productId){
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product with ID " + productId + " does not exist"));
+    }
 
+    public Product findBySku(String sku){
+        return productRepository.findBySku(sku)
+                .orElseThrow(() -> new IllegalArgumentException("Product with sku " + sku + " does not exist"));
+    }
+
+    public List<Product> findAll(){
+        return productRepository.findAll();
+    }
 
 }
