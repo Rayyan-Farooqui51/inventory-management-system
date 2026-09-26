@@ -8,7 +8,6 @@ import repository.ProductRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 public class ProductService {
     private final ProductRepository productRepository;
