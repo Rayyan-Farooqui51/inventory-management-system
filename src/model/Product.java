@@ -1,6 +1,8 @@
 package model;
 
 import exception.InsufficientStockException;
+import exception.SupplierAlreadyAssignedException;
+import exception.SupplierNotAssignedException;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -108,7 +110,9 @@ public class Product {
             throw new IllegalArgumentException("supplier cannot be null");
         }
 
-        suppliers.add(supplier);
+        if (!suppliers.add(supplier)){
+            throw new SupplierAlreadyAssignedException("Supplier with ID " + supplier.getSupplierId() + " already assigned to product with ID " + productId);
+        }
     }
 
     public void removeSupplier(Supplier supplier){
@@ -116,7 +120,9 @@ public class Product {
             throw new IllegalArgumentException("supplier cannot be null");
         }
 
-        suppliers.remove(supplier);
+        if (!suppliers.remove(supplier)){
+            throw new SupplierNotAssignedException("Supplier with ID " + supplier.getSupplierId() + " is not assigned to product with ID " + productId);
+        }
     }
     public Set<Supplier> getSuppliers(){
         return Collections.unmodifiableSet(suppliers);
