@@ -2,21 +2,31 @@ package service;
 
 import exception.DuplicateProductException;
 import exception.ProductNotFoundException;
+import exception.SupplierNotFoundException;
 import model.Category;
 import model.Product;
+import model.Supplier;
 import repository.ProductRepository;
+import repository.SupplierRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public class ProductService {
     private final ProductRepository productRepository;
+    private final SupplierRepository supplierRepository;
 
-    public ProductService(ProductRepository productRepository){
+    public ProductService(ProductRepository productRepository, SupplierRepository supplierRepository){
         if (productRepository == null){
             throw new IllegalArgumentException("Product repository cannot be null");
         }
+
+        if (supplierRepository == null){
+            throw new IllegalArgumentException("Supplier repository cannot be null");
+        }
+
         this.productRepository = productRepository;
+        this.supplierRepository = supplierRepository;
     }
 
     public Product createProduct(String productId, String sku, String name, Category category, BigDecimal price, int quantity, int reorderLevel){
@@ -47,6 +57,28 @@ public class ProductService {
 
     public List<Product> findAll(){
         return productRepository.findAll();
+    }
+
+    public void assignSupplier(String productId, String supplierId){
+        Product product = findById(productId);
+
+        Supplier supplier = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new SupplierNotFoundException("Supplier with ID " + supplierId + " does not exist"));
+
+        product.addSupplier(supplier);
+
+        productRepository.save(product);
+    }
+
+    public void removeSupplier(String productId, String supplierId){
+        Product product = findById(productId);
+
+        Supplier supplier = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new SupplierNotFoundException("Supplier with ID " + supplierId + " does not exist"));
+
+        product.removeSupplier(supplier);
+
+        productRepository.save(product);
     }
 
 }
