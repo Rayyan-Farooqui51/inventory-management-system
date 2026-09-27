@@ -9,6 +9,8 @@ public interface SupplierRepository {
 
     void save(Supplier supplier);
 
+    void update(Supplier supplier);
+
     Optional<Supplier> findById(String supplierId);
 
     Optional<Supplier> findByEmail(String email);

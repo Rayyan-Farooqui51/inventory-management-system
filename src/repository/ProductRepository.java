@@ -9,6 +9,8 @@ public interface ProductRepository {
 
     void save(Product product);
 
+    void update(Product product);
+
     Optional<Product> findById(String productId);
 
     Optional<Product> findBySku(String sku);

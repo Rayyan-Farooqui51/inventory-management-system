@@ -144,4 +144,41 @@ public class Product {
         }
         quantity -= amount;
     }
+
+    public void rename(String newName){
+        if (newName == null || newName.isBlank()){
+            throw new IllegalArgumentException("Name cannot be null or blank");
+        }
+
+        this.name = newName;
+    }
+
+    public void changePrice(BigDecimal newPrice){
+        if (newPrice == null){
+            throw new IllegalArgumentException("Price cannot be null");
+        }
+
+        if (newPrice.compareTo(BigDecimal.ZERO) <= 0){
+            throw new IllegalArgumentException("Price cannot be negative or zero");
+        }
+
+        this.price = newPrice;
+    }
+
+    public void changeCategory(Category newCategory){
+        if (newCategory == null){
+            throw new IllegalArgumentException("Category cannot be null");
+        }
+
+        this.category = newCategory;
+
+    }
+
+    public void changeReorderLevel(int newReorderLevel){
+        if (newReorderLevel < 0){
+            throw new IllegalArgumentException("Reorder Level cannot be negative");
+        }
+
+        this.reorderLevel = newReorderLevel;
+    }
 }

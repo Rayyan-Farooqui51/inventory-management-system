@@ -9,6 +9,8 @@ public interface CategoryRepository {
 
     void save(Category category);
 
+    void update(Category category);
+
     Optional<Category> findById(String categoryId);
 
     Optional<Category> findByName(String name);

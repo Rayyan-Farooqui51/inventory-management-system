@@ -32,7 +32,7 @@ public class InventoryService {
 
         product.increaseStock(amount);
 
-        productRepository.save(product);
+        productRepository.update(product);
 
         StockMovement stockMovement = new StockMovement(movementId, product, StockMovementType.STOCK_IN, amount, LocalDateTime.now());
 
@@ -48,7 +48,7 @@ public class InventoryService {
 
         product.decreaseStock(amount);
 
-        productRepository.save(product);
+        productRepository.update(product);
 
         StockMovement stockMovement = new StockMovement(movementId, product, StockMovementType.STOCK_OUT, amount, LocalDateTime.now());
 
