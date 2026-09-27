@@ -6,6 +6,7 @@ import model.Category;
 import repository.CategoryRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public class CategoryService {
     private final CategoryRepository categoryRepository;
@@ -50,5 +51,30 @@ public class CategoryService {
 
     public List<Category> findAll(){
         return categoryRepository.findAll();
+    }
+
+    public void renameCategory(String categoryId, String newName){
+        Category category = findById(categoryId);
+        Optional<Category> existingCategory  = categoryRepository.findByName(newName);
+
+        if (existingCategory.isPresent()){
+            if (!existingCategory.get().getCategoryId().equals(categoryId)){
+                throw new DuplicateCategoryException("Category with name " + newName + " already exists");
+            }
+            else{
+                return;
+            }
+        }
+
+        category.rename(newName);
+        categoryRepository.update(category);
+    }
+
+    public void changeDescription(String categoryId, String newDescription){
+        Category category = findById(categoryId);
+
+        category.changeDescription(newDescription);
+
+        categoryRepository.update(category);
     }
 }

@@ -41,7 +41,7 @@ public class Category {
     @Override
     public String toString() {
 
-        if (description == null || description.isBlank()){
+        if (description == null){
             return "Category{" +
                     "categoryId='" + categoryId + '\'' +
                     ", name='" + name + '\'' +
