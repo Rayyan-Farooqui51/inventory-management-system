@@ -23,7 +23,7 @@ public class Category {
 
         this.categoryId = categoryId;
         this.name = name;
-        this.description = description;
+        this.description = normalizeDescription(description);
     }
 
     public String getCategoryId() {
@@ -53,5 +53,24 @@ public class Category {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 '}' ;
+    }
+
+    public void rename(String newName){
+        if (newName == null || newName.isBlank()){
+            throw new IllegalArgumentException("Name cannot be null or blank");
+        }
+
+        this.name = newName;
+    }
+
+    public void changeDescription(String newDescription){
+        this.description = normalizeDescription(newDescription);
+    }
+
+    private static String normalizeDescription(String description) {
+        if (description == null || description.isBlank()){
+            return null;
+        }
+        return description;
     }
 }
