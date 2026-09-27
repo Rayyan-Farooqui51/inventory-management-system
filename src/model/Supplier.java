@@ -26,18 +26,10 @@ public class Supplier {
             throw new IllegalArgumentException("Name cannot be null or blank");
         }
 
-        if (email == null || email.isBlank()){
-            throw new IllegalArgumentException("Email Id cannot be null or blank");
-        }
-
-        if (!EMAIL_PATTERN.matcher(email).matches()){
-            throw new IllegalArgumentException("Email format is invalid");
-        }
-
+        this.email = validateEmail(email);
         this.supplierId = supplierId;
         this.name = name;
-        this.email = email;
-        this.phone = phone;
+        this.phone = normalizePhone(phone);
     }
 
     public String getSupplierId() {
@@ -58,7 +50,7 @@ public class Supplier {
 
     @Override
     public String toString() {
-        if (phone == null || phone.isBlank()){
+        if (phone == null){
             return "Supplier{" +
                     "supplierId='" + supplierId + '\'' +
                     ", name='" + name + '\'' +
@@ -92,5 +84,40 @@ public class Supplier {
     @Override
     public int hashCode() {
         return Objects.hash(this.supplierId);
+    }
+
+    public void rename(String newName){
+        if (newName == null || newName.isBlank()){
+            throw new IllegalArgumentException("Name cannot be null or blank");
+        }
+
+        this.name = newName;
+    }
+
+    public void changeEmail(String newEmail){
+        this.email = validateEmail(newEmail);
+    }
+
+    public void changePhone(String newPhone){
+        this.phone = normalizePhone(newPhone);
+    }
+
+    private static String normalizePhone(String newPhone){
+        if (newPhone == null || newPhone.isBlank()){
+            return null;
+        }
+        return newPhone;
+    }
+
+    private static String validateEmail(String newEmail){
+        if (newEmail == null || newEmail.isBlank()){
+            throw new IllegalArgumentException("Email Id cannot be null or blank");
+        }
+
+        if (!EMAIL_PATTERN.matcher(newEmail).matches()){
+            throw new IllegalArgumentException("Email format is invalid");
+        }
+
+        return newEmail;
     }
 }

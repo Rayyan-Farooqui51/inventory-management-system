@@ -6,6 +6,7 @@ import model.Supplier;
 import repository.SupplierRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SupplierService {
     private final SupplierRepository supplierRepository;
@@ -50,6 +51,39 @@ public class SupplierService {
 
     public List<Supplier> findAll(){
         return supplierRepository.findAll();
+    }
+
+    public void renameSupplier(String supplierId, String newName){
+        Supplier supplier = findById(supplierId);
+
+        supplier.rename(newName);
+
+        supplierRepository.update(supplier);
+    }
+
+    public void changeEmail(String supplierId, String newEmail){
+        Supplier supplier = findById(supplierId);
+        Optional<Supplier> existingSupplier = supplierRepository.findByEmail(newEmail);
+
+        if (existingSupplier.isPresent()){
+            if (!existingSupplier.get().getSupplierId().equals(supplierId)){
+                throw new DuplicateSupplierException("Supplier with email " + newEmail + " already exists");
+            }
+            else {
+                return;
+            }
+        }
+
+        supplier.changeEmail(newEmail);
+        supplierRepository.update(supplier);
+    }
+
+    public void changePhone(String supplierId, String newPhone){
+        Supplier supplier = findById(supplierId);
+
+        supplier.changePhone(newPhone);
+
+        supplierRepository.update(supplier);
     }
 
 }
