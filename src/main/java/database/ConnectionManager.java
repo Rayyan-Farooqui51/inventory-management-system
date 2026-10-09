@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class ConnectionManager {
 
-    public Connection getConnection() throws ClassNotFoundException {
+    public Connection getConnection() {
         String db_url = System.getenv("DB_URL");
         String db_username = System.getenv("DB_USERNAME");
         String db_password = System.getenv("DB_PASSWORD");
