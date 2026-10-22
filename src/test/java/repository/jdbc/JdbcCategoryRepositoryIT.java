@@ -29,17 +29,15 @@ public class JdbcCategoryRepositoryIT {
 
     @AfterEach
     void cleanUp() throws SQLException {
+        try (Connection connection = testConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "DELETE FROM categories WHERE category_id IN (?, ?)")) {
 
-        try(
-                Connection connection = testConnectionManager.getConnection();
-                PreparedStatement statement = connection.prepareStatement("DELETE FROM categories WHERE category_id = ?")
-        ){
-
-            statement.setString(1,testCategoryId);
+            statement.setString(1, testCategoryId);
+            statement.setString(2, "IT_CAT_002");
 
             statement.executeUpdate();
         }
-
     }
 
     @Test
@@ -62,6 +60,50 @@ public class JdbcCategoryRepositoryIT {
         assertEquals("Integration Test Category", savedCategory.getName());
         assertEquals("Test description", savedCategory.getDescription().orElse(null));
 
+    }
+
+    @Test
+    void shouldRejectDuplicateCategoryName() {
+        Category first = new Category(
+                testCategoryId,
+                "Duplicate Test Category",
+                "First category"
+        );
+
+        jdbcCategoryRepository.save(first);
+
+        Category duplicate = new Category(
+                "IT_CAT_002",
+                "Duplicate Test Category",
+                "Duplicate category"
+        );
+
+        assertThrows(
+                RuntimeException.class,
+                () -> jdbcCategoryRepository.save(duplicate)
+        );
+    }
+
+    @Test
+    void shouldRejectDuplicateCategoryId() {
+        Category first = new Category(
+                testCategoryId,
+                "First Test Category",
+                "First description"
+        );
+
+        jdbcCategoryRepository.save(first);
+
+        Category duplicate = new Category(
+                testCategoryId,
+                "Second Test Category",
+                "Second description"
+        );
+
+        assertThrows(
+                RuntimeException.class,
+                () -> jdbcCategoryRepository.save(duplicate)
+        );
     }
 
     @Test
@@ -124,6 +166,14 @@ public class JdbcCategoryRepositoryIT {
         Category savedCategory = result.orElseThrow();
         assertEquals(testCategoryId, savedCategory.getCategoryId());
         assertEquals("Integration Test Category", savedCategory.getName());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenCategoryNameDoesNotExist() {
+        Optional<Category> result =
+                jdbcCategoryRepository.findByName("Missing Test Category");
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
