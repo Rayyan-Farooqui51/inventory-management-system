@@ -4,8 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class ConnectionManager {
+public class ConnectionManager implements DatabaseConnectionProvider {
 
+    @Override
     public Connection getConnection() {
         String db_url = System.getenv("DB_URL");
         String db_username = System.getenv("DB_USERNAME");

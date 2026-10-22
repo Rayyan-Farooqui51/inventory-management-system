@@ -1,6 +1,7 @@
 package repository.jdbc;
 
 import database.ConnectionManager;
+import database.DatabaseConnectionProvider;
 import exception.CategoryNotFoundException;
 import model.Category;
 import repository.CategoryRepository;
@@ -12,14 +13,14 @@ import java.util.Optional;
 
 public class JdbcCategoryRepository implements CategoryRepository {
 
-    private final ConnectionManager connectionManager;
+    private final DatabaseConnectionProvider databaseConnectionProvider;
 
-    public JdbcCategoryRepository(ConnectionManager connectionManager){
-        if (connectionManager == null){
-            throw new IllegalArgumentException("Connection Manager cannot be null");
+    public JdbcCategoryRepository(DatabaseConnectionProvider databaseConnectionProvider){
+        if (databaseConnectionProvider == null){
+            throw new IllegalArgumentException("Database connection provider cannot be null");
         }
 
-        this.connectionManager = connectionManager;
+        this.databaseConnectionProvider = databaseConnectionProvider;
     }
 
     @Override
@@ -29,7 +30,7 @@ public class JdbcCategoryRepository implements CategoryRepository {
         }
 
         try(
-                Connection connection = connectionManager.getConnection();
+                Connection connection = databaseConnectionProvider.getConnection();
                 PreparedStatement statement = connection.prepareStatement("Insert into categories (category_id, name, description) values (?, ?, ?)");
         ) {
 
@@ -62,7 +63,7 @@ public class JdbcCategoryRepository implements CategoryRepository {
         }
 
         try(
-                Connection connection = connectionManager.getConnection();
+                Connection connection = databaseConnectionProvider.getConnection();
                 PreparedStatement statement = connection.prepareStatement("SELECT category_id, name, description FROM categories WHERE category_id = ?")
         ) {
             statement.setString(1,categoryId);
@@ -91,7 +92,7 @@ public class JdbcCategoryRepository implements CategoryRepository {
         }
 
         try(
-                Connection connection = connectionManager.getConnection();
+                Connection connection = databaseConnectionProvider.getConnection();
                 PreparedStatement statement = connection.prepareStatement("UPDATE categories SET name = ?, description = ? WHERE category_id = ?")
         ){
 
@@ -123,7 +124,7 @@ public class JdbcCategoryRepository implements CategoryRepository {
         }
 
         try(
-                Connection connection = connectionManager.getConnection();
+                Connection connection = databaseConnectionProvider.getConnection();
                 PreparedStatement statement = connection.prepareStatement("SELECT category_id, name, description FROM categories WHERE name = ?")
         ){
 
@@ -146,7 +147,7 @@ public class JdbcCategoryRepository implements CategoryRepository {
     public List<Category> findAll(){
         List<Category> categories = new ArrayList<>();
         try(
-                Connection connection = connectionManager.getConnection();
+                Connection connection = databaseConnectionProvider.getConnection();
                 PreparedStatement statement = connection.prepareStatement("SELECT category_id, name, description FROM categories")
         ) {
             try(ResultSet resultSet = statement.executeQuery()){
@@ -173,7 +174,7 @@ public class JdbcCategoryRepository implements CategoryRepository {
         }
 
         try(
-                Connection connection = connectionManager.getConnection();
+                Connection connection = databaseConnectionProvider.getConnection();
                 PreparedStatement statement = connection.prepareStatement("SELECT EXISTS(SELECT 1 FROM categories WHERE category_id = ?)")
         ) {
             statement.setString(1, categoryId);
@@ -203,7 +204,7 @@ public class JdbcCategoryRepository implements CategoryRepository {
         }
 
         try(
-                Connection connection = connectionManager.getConnection();
+                Connection connection = databaseConnectionProvider.getConnection();
                 PreparedStatement statement = connection.prepareStatement("SELECT EXISTS(SELECT 1 FROM categories WHERE name = ?)")
         ) {
             statement.setString(1, name);
