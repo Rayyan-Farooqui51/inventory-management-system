@@ -17,7 +17,7 @@ public class JdbcSupplierRepository implements SupplierRepository {
 
     private final DatabaseConnectionProvider databaseConnectionProvider;
 
-    public JdbcSupplierRepository   (DatabaseConnectionProvider databaseConnectionProvider){
+    public JdbcSupplierRepository(DatabaseConnectionProvider databaseConnectionProvider){
         if (databaseConnectionProvider == null){
             throw new IllegalArgumentException("Database connection provider cannot be null");
         }
