@@ -1,6 +1,5 @@
 package repository.jdbc;
 
-import database.ConnectionManager;
 import database.DatabaseConnectionProvider;
 import exception.CategoryNotFoundException;
 import model.Category;
