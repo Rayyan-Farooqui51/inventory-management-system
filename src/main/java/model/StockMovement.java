@@ -19,7 +19,7 @@ public class StockMovement {
         }
 
         if (type == null){
-            throw new IllegalArgumentException("Stock Movement Type Id cannot be null");
+            throw new IllegalArgumentException("Stock Movement Type cannot be null");
         }
 
         if (quantity <= 0){
