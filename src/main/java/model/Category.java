@@ -21,8 +21,8 @@ public class Category {
             throw new IllegalArgumentException("Name cannot be null or blank");
         }
 
-        this.categoryId = categoryId;
-        this.name = name;
+        this.categoryId = categoryId.trim();
+        this.name = name.trim();
         this.description = normalizeDescription(description);
     }
 
@@ -71,6 +71,6 @@ public class Category {
         if (description == null || description.isBlank()){
             return null;
         }
-        return description;
+        return description.trim();
     }
 }
