@@ -175,6 +175,8 @@ public class ProductServiceTest {
 
 
         when(productRepository.existsById("P1")).thenReturn(true);
+        when(categoryRepository.findById("CAT001"))
+                .thenReturn(Optional.of(category));
 
         Assertions.assertThrows(
                 DuplicateProductException.class,
@@ -182,7 +184,7 @@ public class ProductServiceTest {
         );
 
         verify(productRepository).existsById("P1");
-        verify(categoryRepository, never()).findById(category.getCategoryId());
+        verify(categoryRepository).findById(category.getCategoryId());
         verify(productRepository, never()).save(any());
 
     }
@@ -193,6 +195,8 @@ public class ProductServiceTest {
 
         when(productRepository.existsById("P1")).thenReturn(false);
         when(productRepository.existsBySku("HP-LP-14-BL")).thenReturn(true);
+        when(categoryRepository.findById("CAT001"))
+                .thenReturn(Optional.of(category));
 
         Assertions.assertThrows(
                 DuplicateProductException.class,
@@ -201,14 +205,12 @@ public class ProductServiceTest {
 
         verify(productRepository).existsById("P1");
         verify(productRepository).existsBySku("HP-LP-14-BL");
-        verify(categoryRepository, never()).findById(category.getCategoryId());
+        verify(categoryRepository).findById(category.getCategoryId());
         verify(productRepository, never()).save(any());
     }
 
     @Test
     void shouldThrowExceptionWhenCategoryNotFound(){
-        when(productRepository.existsById("P1")).thenReturn(false);
-        when(productRepository.existsBySku("HP-LP-14-BL")).thenReturn(false);
         when(categoryRepository.findById("CAT001")).thenReturn(Optional.empty());
 
         Assertions.assertThrows(
@@ -236,7 +238,7 @@ public class ProductServiceTest {
 
         verify(productRepository).findById("P1");
         verify(supplierRepository).findById("S1");
-        verify(productRepository).save(product);
+        verify(productRepository).update(product);
     }
 
     @Test
@@ -256,7 +258,7 @@ public class ProductServiceTest {
 
         verify(productRepository).findById("P1");
         verify(supplierRepository).findById("S1");
-        verify(productRepository, never()).save(any());
+        verify(productRepository, never()).update(any());
     }
 
     @Test
@@ -277,7 +279,7 @@ public class ProductServiceTest {
 
         verify(productRepository).findById("P1");
         verify(supplierRepository).findById("S1");
-        verify(productRepository).save(product);
+        verify(productRepository).update(product);
     }
 
     @Test
@@ -297,7 +299,7 @@ public class ProductServiceTest {
 
         verify(productRepository).findById("P1");
         verify(supplierRepository).findById("S1");
-        verify(productRepository, never()).save(any());
+        verify(productRepository, never()).update(any());
     }
 
     @Test
@@ -316,7 +318,7 @@ public class ProductServiceTest {
 
         verify(productRepository).findById("P1");
         verify(supplierRepository).findById("S1");
-        verify(productRepository, never()).save(any());
+        verify(productRepository, never()).update(any());
 
     }
 
