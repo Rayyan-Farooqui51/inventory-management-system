@@ -27,8 +27,8 @@ public class Supplier {
         }
 
         this.email = validateEmail(email);
-        this.supplierId = supplierId;
-        this.name = name;
+        this.supplierId = supplierId.trim();
+        this.name = name.trim();
         this.phone = normalizePhone(phone);
     }
 
@@ -106,7 +106,7 @@ public class Supplier {
         if (newPhone == null || newPhone.isBlank()){
             return null;
         }
-        return newPhone;
+        return newPhone.trim();
     }
 
     private static String validateEmail(String newEmail){
@@ -118,6 +118,6 @@ public class Supplier {
             throw new IllegalArgumentException("Email format is invalid");
         }
 
-        return newEmail;
+        return newEmail.trim();
     }
 }
