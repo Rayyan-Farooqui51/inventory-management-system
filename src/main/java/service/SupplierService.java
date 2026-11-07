@@ -20,6 +20,8 @@ public class SupplierService {
     }
 
     public Supplier createSupplier(String supplierId, String name, String email, String phone){
+        Supplier supplier = new Supplier(supplierId, name, email, phone);
+
         if (supplierRepository.existsById(supplierId)){
             throw new DuplicateSupplierException("Supplier with ID " + supplierId + " already exists");
         }
@@ -27,8 +29,6 @@ public class SupplierService {
         if (supplierRepository.existsByEmail(email)){
             throw new DuplicateSupplierException("Supplier with email " + email + " already exists");
         }
-
-        Supplier supplier = new Supplier(supplierId, name, email, phone);
 
         supplierRepository.save(supplier);
 

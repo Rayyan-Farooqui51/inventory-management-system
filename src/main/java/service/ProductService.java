@@ -38,6 +38,11 @@ public class ProductService {
     }
 
     public Product createProduct(String productId, String sku, String name, String categoryId, BigDecimal price, int quantity, int reorderLevel){
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(()-> new CategoryNotFoundException("Category with ID " + categoryId + " does not exist"));
+
+        Product product = new Product(productId, sku, name, category, price, quantity, reorderLevel);
+
         if(productRepository.existsById(productId)){
             throw new DuplicateProductException("Product with ID " + productId + " already exists");
         }
@@ -45,12 +50,6 @@ public class ProductService {
         if (productRepository.existsBySku(sku)){
             throw new DuplicateProductException("Product with SKU " + sku + " already exists");
         }
-
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(()-> new CategoryNotFoundException("Category with ID " + categoryId + " does not exist"));
-
-
-        Product product = new Product(productId, sku, name, category, price, quantity, reorderLevel);
 
         productRepository.save(product);
 
@@ -79,7 +78,7 @@ public class ProductService {
 
         product.addSupplier(supplier);
 
-        productRepository.save(product);
+        productRepository.update(product);
     }
 
     public void removeSupplier(String productId, String supplierId){
@@ -90,7 +89,7 @@ public class ProductService {
 
         product.removeSupplier(supplier);
 
-        productRepository.save(product);
+        productRepository.update(product);
     }
 
     public void renameProduct(String productId, String newName){

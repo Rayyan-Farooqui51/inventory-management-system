@@ -54,9 +54,9 @@ public class Product {
             throw new IllegalArgumentException("Reorder Level cannot be negative");
         }
 
-        this.productId = productId;
-        this.sku =  sku;
-        this.name = name;
+        this.productId = productId.trim();
+        this.sku =  sku.trim();
+        this.name = name.trim();
         this.category = category;
         this.price = price;
         this.quantity = quantity;

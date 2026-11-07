@@ -20,6 +20,8 @@ public class CategoryService {
     }
 
     public Category createCategory(String categoryId, String name, String description){
+        Category category = new Category(categoryId, name, description);
+
         if (categoryRepository.existsById(categoryId)){
             throw new DuplicateCategoryException("Category with ID " + categoryId + " already exists");
         }
@@ -27,8 +29,6 @@ public class CategoryService {
         if (categoryRepository.existsByName(name)){
             throw new DuplicateCategoryException("Category with name " + name + " already exists");
         }
-
-        Category category = new Category(categoryId, name, description);
 
         categoryRepository.save(category);
 
