@@ -318,4 +318,75 @@ public class JdbcProductRepository implements ProductRepository {
 
     }
 
+
+    @Override
+    public void updateStockQuantity(Connection connection, Product product){
+        if (connection == null){
+            throw new IllegalArgumentException("Connection cannot be null");
+        }
+
+        if (product == null){
+            throw new IllegalArgumentException("Product cannot be null");
+        }
+
+        try(PreparedStatement statement = connection.prepareStatement("UPDATE products SET quantity = ? WHERE product_id = ?")) {
+            statement.setInt(1,product.getQuantity());
+            statement.setString(2,product.getProductId());
+
+            int rowsAffected = statement.executeUpdate();
+
+            if (rowsAffected != 1){
+                throw new ProductNotFoundException("Product with id " + product.getProductId() + " does not exists");
+            }
+
+        }
+        catch (SQLException e){
+            throw new RuntimeException("Failed to update quantity", e);
+        }
+    }
+
+    @Override
+    public Optional<Product> findByIdForUpdate(Connection connection, String productId){
+        if (connection == null){
+            throw new IllegalArgumentException("Connection cannot be null");
+        }
+
+        if (productId == null || productId.isBlank()){
+            throw new IllegalArgumentException("Product Id cannot be null or blank");
+        }
+
+        try(
+                PreparedStatement statement = connection.prepareStatement("SELECT p.product_id, p.sku, p.name, p.price,p.quantity,p.reorder_level,c.category_id,c.name AS category_name,c.description AS category_description FROM products p JOIN categories c ON p.category_id = c.category_id WHERE p.product_id = ? FOR UPDATE");
+
+                PreparedStatement supplierStatement = connection.prepareStatement("SELECT s.supplier_id, s.name, s.email, s.phone FROM product_suppliers ps JOIN suppliers s ON ps.supplier_id = s.supplier_id WHERE ps.product_id = ?")
+        ) {
+            statement.setString(1, productId);
+            supplierStatement.setString(1, productId);
+
+            Product product;
+
+            try(ResultSet resultSet = statement.executeQuery()){
+                if (!resultSet.next()){
+                    return Optional.empty();
+                }
+                product = mapRow(resultSet);
+
+            }
+
+            try(ResultSet resultSet = supplierStatement.executeQuery()) {
+                while (resultSet.next()){
+                    Supplier supplier = new Supplier(resultSet.getString("supplier_id"), resultSet.getString("name"), resultSet.getString("email"), resultSet.getString("phone"));
+
+                    product.addSupplier(supplier);
+                }
+            }
+            return Optional.of(product);
+
+        }
+        catch (SQLException e){
+            throw new RuntimeException("Failed to find product", e);
+        }
+
+    }
+
 }

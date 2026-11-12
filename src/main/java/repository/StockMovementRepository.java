@@ -3,10 +3,13 @@ package repository;
 import model.StockMovement;
 import model.StockMovementType;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
 public interface StockMovementRepository {
+
+    void save(Connection connection, StockMovement stockMovement);
 
     void save(StockMovement stockMovement);
 

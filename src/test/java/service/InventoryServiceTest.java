@@ -1,5 +1,7 @@
 package service;
 
+import database.TransactionCallback;
+import database.TransactionManager;
 import exception.InsufficientStockException;
 import exception.ProductNotFoundException;
 import model.Category;
@@ -19,6 +21,7 @@ import repository.StockMovementRepository;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,18 +33,24 @@ public class InventoryServiceTest {
     @Mock
     private StockMovementRepository stockMovementRepository;
 
+    @Mock
+    private TransactionManager transactionManager;
+
+    @Mock
+    private Connection connection;
+
     private InventoryService inventoryService;
 
     @BeforeEach
     void setUp(){
-        inventoryService = new InventoryService(productRepository, stockMovementRepository);
+        inventoryService = new InventoryService(productRepository, stockMovementRepository, transactionManager);
     }
 
     @Test
     void shouldRejectNullProductRepository(){
         Assertions.assertThrows(
                 IllegalArgumentException.class,
-                ()-> new InventoryService(null,stockMovementRepository)
+                ()-> new InventoryService(null,stockMovementRepository, transactionManager)
         );
     }
 
@@ -49,31 +58,51 @@ public class InventoryServiceTest {
     void shouldRejectNullStockMovementRepository(){
         Assertions.assertThrows(
                 IllegalArgumentException.class,
-                ()-> new InventoryService(productRepository,null)
+                ()-> new InventoryService(productRepository,null, transactionManager)
+        );
+    }
+
+    @Test
+    void shouldRejectNullTransactionManage(){
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                ()-> new InventoryService(productRepository,stockMovementRepository, null)
         );
     }
 
     @Test
     void shouldThrowExceptionWhenProductNotFoundForStockIn() {
-        when(productRepository.findById("P1")).thenReturn(Optional.empty());
+        mockTransactionExecution();
+
+        when(productRepository.findByIdForUpdate(connection, "P1")).thenReturn(Optional.empty());
 
         Assertions.assertThrows(
                 ProductNotFoundException.class,
                 () -> inventoryService.stockIn("M1", "P1", 10)
         );
 
-        verify(productRepository).findById("P1");
-        verify(productRepository, never()).update(any(Product.class));
-        verify(stockMovementRepository, never()).save(any(StockMovement.class));
+        verify(productRepository).findByIdForUpdate(connection, "P1");
+        verify(productRepository, never()).updateStockQuantity(eq(connection), any(Product.class));
+        verify(stockMovementRepository, never()).save(eq(connection), any(StockMovement.class));
+    }
+
+    private void mockTransactionExecution() {
+        when(transactionManager.executeInTransaction(any()))
+                .thenAnswer(invocation -> {
+                    TransactionCallback<?> callback = invocation.getArgument(0);
+                    return callback.execute(connection);
+                });
     }
 
     @Test
     void shouldStockInSuccessfully(){
+        mockTransactionExecution();
+
         Category category = new Category("C1", "Electronics");
 
         Product product = new Product("P1","SKU-1","Keyboard",category,new BigDecimal("1000.00"),20,5);
 
-        when(productRepository.findById("P1")).thenReturn(Optional.of(product));
+        when(productRepository.findByIdForUpdate(connection, "P1")).thenReturn(Optional.of(product));
 
         StockMovement result = inventoryService.stockIn("M1", "P1", 10);
 
@@ -82,12 +111,12 @@ public class InventoryServiceTest {
         Assertions.assertEquals(10, result.getQuantity());
         Assertions.assertEquals(30, product.getQuantity());
 
-        verify(productRepository).findById("P1");
-        verify(productRepository).update(product);
+        verify(productRepository).findByIdForUpdate(connection, "P1");
+        verify(productRepository).updateStockQuantity(connection, product);
 
         ArgumentCaptor<StockMovement> captor = ArgumentCaptor.forClass(StockMovement.class);
 
-        verify(stockMovementRepository).save(captor.capture());
+        verify(stockMovementRepository).save(eq(connection), captor.capture());
 
         StockMovement savedMovement = captor.getValue();
 
@@ -100,26 +129,30 @@ public class InventoryServiceTest {
 
     @Test
     void shouldThrowExceptionWhenProductNotFoundForStockOut(){
-        when(productRepository.findById("P1")).thenReturn(Optional.empty());
+        mockTransactionExecution();
+
+        when(productRepository.findByIdForUpdate(connection, "P1")).thenReturn(Optional.empty());
 
         Assertions.assertThrows(
                 ProductNotFoundException.class,
                 () -> inventoryService.stockOut("M1", "P1", 10)
         );
 
-        verify(productRepository).findById("P1");
-        verify(productRepository, never()).update(any(Product.class));
-        verify(stockMovementRepository, never()).save(any(StockMovement.class));
+        verify(productRepository).findByIdForUpdate(connection,"P1");
+        verify(productRepository, never()).updateStockQuantity(eq(connection), any(Product.class));
+        verify(stockMovementRepository, never()).save(eq(connection), any(StockMovement.class));
 
     }
 
     @Test
     void shouldStockOutSuccessfully(){
+        mockTransactionExecution();
+
         Category category = new Category("C1", "Electronics");
 
         Product product = new Product("P1","SKU-1","Keyboard",category,new BigDecimal("1000.00"),20,5);
 
-        when(productRepository.findById("P1")).thenReturn(Optional.of(product));
+        when(productRepository.findByIdForUpdate(connection, "P1")).thenReturn(Optional.of(product));
 
         StockMovement result = inventoryService.stockOut("M1", "P1", 10);
 
@@ -128,12 +161,12 @@ public class InventoryServiceTest {
         Assertions.assertEquals(10, result.getQuantity());
         Assertions.assertEquals(10, product.getQuantity());
 
-        verify(productRepository).findById("P1");
-        verify(productRepository).update(product);
+        verify(productRepository).findByIdForUpdate(connection, "P1");
+        verify(productRepository).updateStockQuantity(connection, product);
 
         ArgumentCaptor<StockMovement> captor = ArgumentCaptor.forClass(StockMovement.class);
 
-        verify(stockMovementRepository).save(captor.capture());
+        verify(stockMovementRepository).save(eq(connection), captor.capture());
 
         StockMovement savedMovement = captor.getValue();
 
@@ -146,21 +179,22 @@ public class InventoryServiceTest {
 
     @Test
     void shouldThrowExceptionWhenStockIsInsufficient(){
+        mockTransactionExecution();
+
         Category category = new Category("C1", "Electronics");
 
         Product product = new Product("P1","SKU-1","Keyboard",category,new BigDecimal("1000.00"),20,5);
 
-        when(productRepository.findById("P1")).thenReturn(Optional.of(product));
+        when(productRepository.findByIdForUpdate(connection, "P1")).thenReturn(Optional.of(product));
 
         Assertions.assertThrows(
                 InsufficientStockException.class,
                 ()->inventoryService.stockOut("M1","P1", 30)
         );
 
-        verify(productRepository).findById("P1");
-        verify(productRepository, never()).update(any(Product.class));
-        verify(stockMovementRepository, never()).save(any(StockMovement.class));
+        verify(productRepository).findByIdForUpdate(connection, "P1");
+        verify(productRepository, never()).updateStockQuantity(eq(connection), any(Product.class));
+        verify(stockMovementRepository, never()).save(eq(connection), any(StockMovement.class));
     }
-
 
 }

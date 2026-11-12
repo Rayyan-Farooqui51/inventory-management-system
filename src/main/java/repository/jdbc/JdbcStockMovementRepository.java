@@ -30,7 +30,6 @@ public class JdbcStockMovementRepository implements StockMovementRepository {
         this.productRepository = productRepository;
     }
 
-
     @Override
     public void save(StockMovement stockMovement){
 
@@ -42,6 +41,38 @@ public class JdbcStockMovementRepository implements StockMovementRepository {
                 Connection connection = databaseConnectionProvider.getConnection();
                 PreparedStatement statement = connection.prepareStatement("INSERT INTO stock_movements(movement_id, product_id, type, quantity, timestamp) values(?,?,?,?,?)")
         ) {
+            statement.setString(1,stockMovement.getMovementId());
+            statement.setString(2,stockMovement.getProduct().getProductId());
+            statement.setString(3,stockMovement.getType().name());
+            statement.setInt(4,stockMovement.getQuantity());
+            statement.setTimestamp(5,Timestamp.valueOf(stockMovement.getTimestamp()));
+
+            int rowsAffected = statement.executeUpdate();
+
+            if (rowsAffected != 1){
+                throw new IllegalStateException( "Expected to insert one stock movement, but inserted " + rowsAffected);
+            }
+
+        }
+        catch (SQLException e){
+            throw new RuntimeException("Failed to save stock movement", e);
+        }
+
+    }
+
+
+    @Override
+    public void save(Connection connection, StockMovement stockMovement){
+
+        if (stockMovement == null){
+            throw new IllegalArgumentException("Stock Movement cannot be null");
+        }
+
+        if (connection == null){
+            throw new IllegalArgumentException("Connection cannot be null");
+        }
+
+        try(PreparedStatement statement = connection.prepareStatement("INSERT INTO stock_movements(movement_id, product_id, type, quantity, timestamp) values(?,?,?,?,?)")) {
             statement.setString(1,stockMovement.getMovementId());
             statement.setString(2,stockMovement.getProduct().getProductId());
             statement.setString(3,stockMovement.getType().name());
